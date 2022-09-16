@@ -20,19 +20,31 @@ export default function Home() {
 
   const [faceIsShowing, setFaceIsShowing] = useState(true)
 
+  const [gatherData, setGatherData] = useState()
+
+  const [net , setNet] = useState()
+
+  const [faceData, setFaceData] = useState()
+
   const runFacemesh = async () => {
       const net = await facemesh.load({
         inputResolution:{width:640, height:480}, 
         // inputResolution:{width:1280, height:960}, 
         scale:.5
       })
+      
       setInterval(() => {
-        detectFace(net)
-      }, 1000)
+          detectFace(net)
+        }, 300)
+      
     }
     
     const detectFace = async (net) => {
-      if (typeof webcamRef.current !=='undefined' && webcamRef.current !== null && webcamRef.current.video.readyState === 4) {
+      if (
+        typeof webcamRef.current !=='undefined' && 
+        webcamRef.current !== null && 
+        webcamRef.current.video.readyState === 4
+        ) {
       // if (typeof webcamRef.current !=='undefined' && webcamRef.current !== null) {
         // console.log('you are seeing this')
         const video = webcamRef.current.video
@@ -45,19 +57,23 @@ export default function Home() {
       canvasRef.current.width = videoWidth
       canvasRef.current.height = videoHeight
       
-      const face = await net.estimateFaces(video)
-      // if (face)
-      console.log(face[0])
-      if (face[0]) {
-        console.log('NICE FACE BRO')
-        setFaceIsShowing(true)
-      } else {
-        console.log('SHOW YOURSELF')
-        setFaceIsShowing(false)
-      }
-
-      const ctx = canvasRef.current.getContext("2d")
-      drawMesh(face, ctx)
+      
+        // console.log(gatherData)
+        const face = await net.estimateFaces(video)
+        // if (face)
+        // console.log(face[0])
+        if (face[0]) {
+          setFaceData(face[0])
+          // console.log('NICE FACE BRO')
+          setFaceIsShowing(true)
+        } else {
+          // console.log('SHOW YOURSELF')
+          setFaceIsShowing(false)
+        }
+  
+        const ctx = canvasRef.current.getContext("2d")
+        drawMesh(face, ctx)
+      
 
 
     }
@@ -68,6 +84,18 @@ export default function Home() {
   }, [])
     
   // runFacemesh()
+  const collectFaceData = async () => {
+
+  }
+
+  const check = () => {
+    if (faceData.boundingBox.topLeft[0] > 240) {
+      console.log('you are on the left side of the webcam')
+    } else {
+      console.log('you are on the right side of the webcam')
+    }
+    // console.log(faceData.boundingBox.topLeft[0])
+  }
     
 
   return (
@@ -79,12 +107,26 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
 
-        {/* <div className='app-header'> */}
-
+        <div className='app-header'>
+          <button onClick={() => check()}>CHECK</button>
+        <button onClick={() => collectFaceData()}>{faceIsShowing ? 'gathering' : 'not gathering'}</button>
         <h1>{faceIsShowing ? 'LOOKING GOOD' : 'SHOW YOUR FACE!!!!'}</h1>
+        {
+          faceData &&
+          <h1
+            style={{
+              position: 'absolute',
+              fontSize: '32px',
+              height:'100px',
+              width: '100px',
+              // left:'500px'
+              left: `${faceData.boundingBox.topLeft[0] + 200}px`
+            }}
+          >👽</h1>
+        }
         <Webcam ref={webcamRef} style={
           {
-            position: 'absolute',
+            // position: 'absolute',
             marginLeft: 'auto',
             marginRight: 'auto',
             left: 0,
@@ -113,7 +155,7 @@ export default function Home() {
             // backgroundColor: 'blue'
           }
         }/>
-        {/* </div> */}
+        </div>
       </main>
     </div>
   )

@@ -1,3 +1,11 @@
+# about
+Bare bones facial landmark detection using tensorflow. I decided to use hand gesture detection instead but wanted to keep this repo since everything is simple enough and working perfectly.
+
+I also used the bounding box position to get data to drive the position of a dom element.
+
+<details>
+<summary> Instructions to recreate in another repo (nothing fancy)</summary>
+
 1. Install dependencies
     ```shell
         npm install @tensorflow/tfjs @tensorflow-models/facemesh react-webcam
@@ -48,3 +56,4 @@
             })
         }
     ```
+</details>
