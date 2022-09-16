@@ -3,19 +3,72 @@ import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
 
-import React, {useRef} from 'react'
+import React, {useRef, useState, useEffect} from 'react'
 import * as tf from '@tensorflow/tfjs'
 import * as facemesh from '@tensorflow-models/facemesh'
 import Webcam from 'react-webcam'
 
+
+import { drawMesh } from './utilities'
+
+
+
 export default function Home() {
 
-    const webcamRef = useRef(null)
-    const canvasRef = useRef(null)
+  const webcamRef = useRef(null)
+  const canvasRef = useRef(null)
 
-    const useFacemesh = async () => {
+  const [faceIsShowing, setFaceIsShowing] = useState(true)
+
+  const runFacemesh = async () => {
+      const net = await facemesh.load({
+        inputResolution:{width:640, height:480}, 
+        // inputResolution:{width:1280, height:960}, 
+        scale:.5
+      })
+      setInterval(() => {
+        detectFace(net)
+      }, 1000)
+    }
+    
+    const detectFace = async (net) => {
+      if (typeof webcamRef.current !=='undefined' && webcamRef.current !== null && webcamRef.current.video.readyState === 4) {
+      // if (typeof webcamRef.current !=='undefined' && webcamRef.current !== null) {
+        // console.log('you are seeing this')
+        const video = webcamRef.current.video
+        const videoWidth = webcamRef.current.video.videoWidth
+        const videoHeight = webcamRef.current.video.videoHeight
+
+      webcamRef.current.video.width = videoWidth
+      webcamRef.current.video.height = videoHeight
+
+      canvasRef.current.width = videoWidth
+      canvasRef.current.height = videoHeight
+      
+      const face = await net.estimateFaces(video)
+      // if (face)
+      console.log(face[0])
+      if (face[0]) {
+        console.log('NICE FACE BRO')
+        setFaceIsShowing(true)
+      } else {
+        console.log('SHOW YOURSELF')
+        setFaceIsShowing(false)
+      }
+
+      const ctx = canvasRef.current.getContext("2d")
+      drawMesh(face, ctx)
+
 
     }
+  }
+
+  useEffect(() => {
+    // runFacemesh()
+  }, [])
+    
+  // runFacemesh()
+    
 
   return (
     <div className={styles.container}>
@@ -26,8 +79,9 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
 
-        {/* <header className='app-header'> */}
+        {/* <div className='app-header'> */}
 
+        <h1>{faceIsShowing ? 'LOOKING GOOD' : 'SHOW YOUR FACE!!!!'}</h1>
         <Webcam ref={webcamRef} style={
           {
             position: 'absolute',
@@ -39,6 +93,8 @@ export default function Home() {
             zIndex:9,
             width: 640,
             height: 480,
+            // width: 1280,
+            // height: 960,
           }
         }/>
         <canvas ref={canvasRef} style={
@@ -52,9 +108,12 @@ export default function Home() {
             zIndex:9,
             width: 640,
             height: 480,
+            // width: 1280,
+            // height: 960,
+            // backgroundColor: 'blue'
           }
         }/>
-        {/* </header> */}
+        {/* </div> */}
       </main>
     </div>
   )

@@ -40,3 +40,11 @@
     ```
 
 4. Load facemesh
+    ```js
+        const useFacemesh = async () => {
+            const net = await facemesh.load({
+            inputResolution:{width:640, height:480}, 
+            scale:0.8
+            })
+        }
+    ```
