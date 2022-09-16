@@ -3,6 +3,8 @@ Bare bones facial landmark detection using tensorflow. I decided to use hand ges
 
 I also used the bounding box position to get data to drive the position of a dom element.
 
+[I removed the emoji on this scuffed deployment and it takes forever to load on mobile and isn't responsive but check it out if you want](https://xktensormesh.vercel.app/)
+
 <details>
 <summary> Instructions to recreate in another repo (nothing fancy)</summary>
 
